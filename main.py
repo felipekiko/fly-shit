@@ -295,7 +295,17 @@ class Human:
         self.has_havaiana = random.random() < 0.45
         self.has_cap      = random.random() < 0.30
         self.cap_col      = BR_GREEN if random.random() < 0.5 else BR_YELLOW
-        self.has_beer     = random.random() < 0.28
+        self.has_beer  = random.random() < 0.28
+        self.skin_col  = random.choice([
+            (255, 218, 175), (240, 194, 145), (200, 155, 110),
+            (165, 115,  80), (120,  80,  55),
+        ])
+        self.hair_col  = random.choice([
+            (35, 20, 10), (60, 38, 18), (85, 55, 22), (20, 20, 20),
+        ])
+        self.pants_col = random.choice([
+            (55, 65, 75), (30, 55, 28), (75, 75, 75), (18, 38, 78), (55, 28, 18),
+        ])
 
     def update(self, fly_positions: list):
         """Persegue a mosca viva mais próxima."""
@@ -354,24 +364,71 @@ class Human:
         x, y    = int(self.pos.x), int(self.pos.y)
         chasing = self.state == "chase"
         atc     = self.attack_type
-        pygame.draw.ellipse(surf, (0, 0, 0), (x - 8, y + 13, 16, 7))
-        pygame.draw.line(surf, self.shirt, (x - 3, y + 6),  (x - 6, y + 16), 3)
-        pygame.draw.line(surf, self.shirt, (x + 3, y + 6),  (x + 6, y + 16), 3)
-        pygame.draw.rect(surf, self.shirt, (x - 7, y - 8, 14, 15), border_radius=4)
-        if chasing:
-            pygame.draw.line(surf, self.shirt, (x - 7, y - 4), (x - 16, y - 13), 3)
-            pygame.draw.line(surf, self.shirt, (x + 7, y - 4), (x + 16, y - 13), 3)
-            pygame.draw.circle(surf, ATTACK_COLORS[atc], (x, y - 27), 5)
-            pygame.draw.circle(surf, WHITE, (x, y - 27), 5, 1)
+        sc      = self.skin_col
+
+        # sombra
+        pygame.draw.ellipse(surf, (0, 0, 0), (x - 9, y + 19, 18, 6))
+
+        # sapatos / havaianas
+        if self.has_havaiana:
+            pygame.draw.ellipse(surf, (15, 75, 210), (x - 10, y + 16, 10, 5))
+            pygame.draw.ellipse(surf, (15, 75, 210), (x +  1, y + 16, 10, 5))
+            pygame.draw.line(surf, (10, 50, 180), (x - 5, y + 16), (x - 5, y + 12), 2)
+            pygame.draw.line(surf, (10, 50, 180), (x + 6, y + 16), (x + 6, y + 12), 2)
         else:
-            pygame.draw.line(surf, self.shirt, (x - 7, y - 4), (x - 14, y + 2), 3)
-            pygame.draw.line(surf, self.shirt, (x + 7, y - 4), (x + 14, y + 2), 3)
-        pygame.draw.circle(surf, SKIN,  (x, y - 14), 8)
-        pygame.draw.circle(surf, BLACK, (x - 3, y - 15), 2)
-        pygame.draw.circle(surf, BLACK, (x + 3, y - 15), 2)
+            shoe = (38, 26, 14)
+            pygame.draw.ellipse(surf, shoe, (x - 10, y + 16, 10, 5))
+            pygame.draw.ellipse(surf, shoe, (x +  1, y + 16, 10, 5))
+
+        # pernas (calça)
+        pygame.draw.rect(surf, self.pants_col, (x - 6, y + 4, 5, 13), border_radius=2)
+        pygame.draw.rect(surf, self.pants_col, (x + 1, y + 4, 5, 13), border_radius=2)
+
+        # torso (camiseta)
+        pygame.draw.rect(surf, self.shirt, (x - 8, y - 10, 16, 16), border_radius=4)
+
+        # pescoço
+        pygame.draw.rect(surf, sc, (x - 3, y - 16, 6, 7))
+
+        # braços
         if chasing:
-            pygame.draw.line(surf, BLACK, (x - 6, y - 20), (x - 1, y - 18), 2)
-            pygame.draw.line(surf, BLACK, (x + 1, y - 18), (x + 6, y - 20), 2)
+            pygame.draw.line(surf, self.shirt, (x - 8, y - 6), (x - 18, y - 14), 4)
+            pygame.draw.circle(surf, sc, (x - 19, y - 15), 3)
+            pygame.draw.line(surf, self.shirt, (x + 8, y - 6), (x + 18, y - 14), 4)
+            pygame.draw.circle(surf, sc, (x + 19, y - 15), 3)
+            pygame.draw.circle(surf, ATTACK_COLORS[atc], (x, y - 33), 5)
+            pygame.draw.circle(surf, WHITE, (x, y - 33), 5, 1)
+        else:
+            pygame.draw.line(surf, self.shirt, (x - 8, y - 6), (x - 14, y + 4), 4)
+            pygame.draw.circle(surf, sc, (x - 15, y + 5), 3)
+            pygame.draw.line(surf, self.shirt, (x + 8, y - 6), (x + 14, y + 4), 4)
+            pygame.draw.circle(surf, sc, (x + 15, y + 5), 3)
+
+        # cabeça
+        pygame.draw.circle(surf, sc, (x, y - 22), 10)
+
+        # boné
+        if self.has_cap:
+            pygame.draw.rect(surf, self.cap_col, (x - 9, y - 32, 18, 8), border_radius=3)
+            pygame.draw.rect(surf, self.cap_col, (x - 9, y - 25, 22, 3), border_radius=1)
+        else:
+            pygame.draw.arc(surf, self.hair_col,
+                            (x - 10, y - 33, 20, 14), 0, math.pi, 5)
+
+        # olhos e expressão
+        if chasing:
+            pygame.draw.line(surf, self.hair_col, (x - 8, y - 25), (x - 3, y - 27), 2)
+            pygame.draw.line(surf, self.hair_col, (x + 3, y - 27), (x + 8, y - 25), 2)
+            pygame.draw.circle(surf, (210, 40, 40), (x - 4, y - 23), 2)
+            pygame.draw.circle(surf, (210, 40, 40), (x + 4, y - 23), 2)
+            pygame.draw.ellipse(surf, (110, 28, 28), (x - 4, y - 17, 8, 5))
+        else:
+            pygame.draw.circle(surf, BLACK, (x - 4, y - 23), 2)
+            pygame.draw.circle(surf, BLACK, (x + 4, y - 23), 2)
+            pygame.draw.arc(surf, self.hair_col,
+                            (x - 4, y - 17, 8, 4), math.pi, 2 * math.pi, 1)
+
+        # armas
         if chasing:
             if atc == "slipper":
                 s = pygame.Surface((22, 13), pygame.SRCALPHA)
@@ -379,27 +436,22 @@ class Human:
                 pygame.draw.line(s, (110, 70, 30), (11, 0), (11, 5), 2)
                 pygame.draw.line(s, (110, 70, 30), (11, 5), (5, 10), 2)
                 pygame.draw.line(s, (110, 70, 30), (11, 5), (17, 10), 2)
-                surf.blit(s, (x + 13, y - 15))
+                surf.blit(s, (x + 16, y - 18))
             elif atc == "spray":
-                pygame.draw.rect(surf, (40, 170, 60),    (x + 13, y - 16, 7, 14), border_radius=2)
-                pygame.draw.circle(surf, (200, 235, 200), (x + 16, y - 17), 3)
-                pygame.draw.rect(surf, (20, 20, 20),     (x + 18, y - 13, 5, 3))
+                pygame.draw.rect(surf, (40, 170, 60),    (x + 16, y - 18, 7, 14), border_radius=2)
+                pygame.draw.circle(surf, (200, 235, 200), (x + 19, y - 19), 3)
+                pygame.draw.rect(surf, (20, 20, 20),      (x + 21, y - 15, 5, 3))
                 if self.throw_cd < 20:
                     ms = pygame.Surface((14, 10), pygame.SRCALPHA)
                     pygame.draw.circle(ms, (100, 220, 80, 120), (7, 5), 5)
-                    surf.blit(ms, (x + 21, y - 16))
-        # havaianas
-        if self.has_havaiana:
-            pygame.draw.ellipse(surf, (15, 75, 210), (x - 9, y + 17, 9, 4))
-            pygame.draw.ellipse(surf, (15, 75, 210), (x + 1,  y + 17, 9, 4))
-        # boné
-        if self.has_cap:
-            pygame.draw.rect(surf, self.cap_col, (x - 7, y - 22, 14, 6), border_radius=2)
-            pygame.draw.rect(surf, self.cap_col, (x - 7, y - 17, 20, 3), border_radius=1)
+                    surf.blit(ms, (x + 24, y - 18))
+
         # latinha (só em patrol)
         if not chasing and self.has_beer:
-            pygame.draw.rect(surf, (205, 30, 30), (x + 12, y - 6, 6, 12), border_radius=2)
-            pygame.draw.rect(surf, (240, 195, 40), (x + 12, y - 6, 6, 4))
+            pygame.draw.rect(surf, (205, 30, 30),   (x + 13, y - 8, 6, 13), border_radius=2)
+            pygame.draw.rect(surf, (240, 195, 40),  (x + 13, y - 8, 6,  4))
+            pygame.draw.rect(surf, (220, 220, 220), (x + 13, y + 4, 6,  1))
+
         if self.projectile:
             self.projectile.draw(surf)
 
@@ -441,7 +493,7 @@ class Location:
         x, y, w, h = self.rect.x, self.rect.y, self.rect.w, self.rect.h
         cx = x + w // 2
 
-        # toldinho listrado verde/amarelo sobre a entrada
+        # toldinho listrado verde/amarelo
         aw_x = cx - 30
         for i in range(6):
             col = BR_GREEN if i % 2 == 0 else BR_YELLOW
@@ -452,105 +504,174 @@ class Location:
         _draw_br_flag(surf, x + w - 22, y + 27, 18, 12)
 
         if self.name == "Padaria":
-            # placa + xícara de café + pão de queijo
-            pygame.draw.rect(surf, (200, 160, 60), (x + 5, y + 28, 55, 18), border_radius=3)
-            t = self.fpts.render("Pão de Queijo!", True, (80, 40, 10))
-            surf.blit(t, (x + 7, y + 31))
-            pygame.draw.ellipse(surf, (60, 35, 12), (x + 5, y + 50, 14, 10))
-            pygame.draw.arc(surf, (60, 35, 12), (x + 17, y + 52, 5, 6), 0, math.pi, 2)
-            pygame.draw.ellipse(surf, (220, 170, 80), (x + 6, y + 52, 12, 5))
+            # placa neon estilo padaria BR
+            pygame.draw.rect(surf, (200, 140, 30), (x + 4, y + 28, 60, 17), border_radius=3)
+            pygame.draw.rect(surf, (250, 200, 60), (x + 4, y + 28, 60, 17), border_radius=3, width=2)
+            t = self.fpts.render("Pão Fresquinho!", True, (60, 30, 5))
+            surf.blit(t, (x + 6, y + 31))
+            # vitrine com pães
+            pygame.draw.rect(surf, (200, 185, 155), (x + 4, y + 48, 60, 22), border_radius=2)
+            pygame.draw.rect(surf, (160, 140, 110), (x + 4, y + 48, 60, 22), border_radius=2, width=1)
+            for bx2, by2, bw2, bh2 in [
+                (x+7, y+52, 14, 8), (x+23, y+51, 10, 9), (x+35, y+53, 12, 7), (x+49, y+52, 12, 8)
+            ]:
+                pygame.draw.ellipse(surf, (215, 175, 90), (bx2, by2, bw2, bh2))
+                pygame.draw.ellipse(surf, (180, 130, 55), (bx2, by2, bw2, bh2), 1)
+            # xícara de café
+            pygame.draw.ellipse(surf, (55, 32, 10), (x + 5, y + 74, 14, 9))
+            pygame.draw.arc(surf, (55, 32, 10), (x + 17, y + 76, 5, 6), 0, math.pi, 2)
+            pygame.draw.ellipse(surf, (200, 155, 75), (x + 6, y + 76, 12, 5))
 
         elif self.name == "Restaurante":
-            # placa + espetinho + churrasqueira
-            pygame.draw.rect(surf, (170, 55, 40), (x + 5, y + 28, 60, 16), border_radius=3)
-            t = self.fpts.render("Rodízio R$49!", True, WHITE)
-            surf.blit(t, (x + 7, y + 31))
-            pygame.draw.line(surf, (150, 85, 20), (x + 10, y + 52), (x + 10, y + 68), 2)
-            for yy in [y + 54, y + 59, y + 64]:
-                pygame.draw.circle(surf, (180, 55, 30), (x + 10, yy), 4)
-                pygame.draw.circle(surf, (200, 100, 20), (x + 10, yy), 2)
+            # placa self-service por quilo (muito BR)
+            pygame.draw.rect(surf, (160, 45, 35), (x + 4, y + 28, 68, 17), border_radius=3)
+            t = self.fpts.render("SELF-SERVICE P/ KG", True, WHITE)
+            surf.blit(t, (x + 6, y + 31))
+            # balcão de buffet com bandejas
+            pygame.draw.rect(surf, (170, 165, 160), (x + 4, y + 48, 70, 8), border_radius=2)
+            for bi, fc in enumerate([(210,170,80),(140,185,100),(195,85,55),(230,200,90)]):
+                pygame.draw.ellipse(surf, fc, (x + 6 + bi*17, y + 50, 14, 5))
+            # bandeja de arroz e feijão
+            pygame.draw.rect(surf, (215, 215, 210), (x + 4, y + 58, 32, 14), border_radius=2)
+            pygame.draw.ellipse(surf, (240, 235, 215), (x + 6, y + 60, 12, 8))   # arroz
+            pygame.draw.ellipse(surf, (100, 65, 30),  (x + 20, y + 60, 12, 8))   # feijão
             # fumaça
-            for fx in [x+8, x+12]:
+            for fx in [x+10, x+16, x+22]:
                 pygame.draw.arc(surf, (160, 160, 160),
                                 (fx, y + 46, 6, 6), 0, math.pi, 2)
 
         elif self.name == "Supermercado":
-            pygame.draw.rect(surf, (55, 80, 185), (x + 5, y + 28, 65, 16), border_radius=3)
-            t = self.fpts.render("OFERTA DO DIA!", True, BR_YELLOW)
-            surf.blit(t, (x + 7, y + 31))
+            # placa promoção
+            pygame.draw.rect(surf, (200, 30, 30), (x + 4, y + 28, 50, 17), border_radius=3)
+            pygame.draw.rect(surf, (255, 220, 0), (x + 4, y + 28, 50, 17), border_radius=3, width=2)
+            t = self.fpts.render("PROMOÇÃO!", True, WHITE)
+            surf.blit(t, (x + 6, y + 31))
+            # preço
+            p2 = self.fpts.render("Feijão 5kg R$18", True, (250, 220, 50))
+            surf.blit(p2, (x + 56, y + 31))
             # carrinho de compras
             pygame.draw.lines(surf, (45, 65, 155),
                               False, [(x+6,y+52),(x+10,y+47),(x+24,y+47),(x+26,y+54)], 2)
             pygame.draw.circle(surf, (45, 65, 155), (x + 11, y + 57), 3)
             pygame.draw.circle(surf, (45, 65, 155), (x + 23, y + 57), 3)
+            # prateleira com produtos
+            pygame.draw.rect(surf, (130, 105, 75), (x + 32, y + 46, 60, 3))
+            pygame.draw.rect(surf, (130, 105, 75), (x + 32, y + 60, 60, 3))
+            shelf_items = [
+                (BR_GREEN,      8), (BR_YELLOW,    6),
+                ((180, 50, 50), 7), ((100, 40,140), 8),
+            ]
+            for pi2, (col2, pw2) in enumerate(shelf_items):
+                px2 = x + 34 + pi2 * 15
+                pygame.draw.rect(surf, col2, (px2, y + 49, pw2, 11), border_radius=1)
+
             # açaí
-            pygame.draw.rect(surf, (100, 40, 140), (x + 30, y + 48, 10, 14), border_radius=2)
+            pygame.draw.rect(surf, (100, 40, 140), (x + 96, y + 49, 8, 11), border_radius=2)
             t2 = self.fpts.render("açaí", True, (180, 100, 220))
-            surf.blit(t2, (x + 28, y + 64))
+            surf.blit(t2, (x + 93, y + 61))
 
         elif self.name == "Hospital":
-            pygame.draw.rect(surf, (200, 210, 230), (x + 5, y + 28, 65, 16), border_radius=3)
-            t = self.fpts.render("PRONTO SUS", True, (140, 30, 30))
-            surf.blit(t, (x + 7, y + 31))
-            pygame.draw.rect(surf, RED, (x + 13, y + 50, 14, 4))
-            pygame.draw.rect(surf, RED, (x + 18, y + 45,  4, 14))
+            pygame.draw.rect(surf, (210, 220, 240), (x + 4, y + 28, 70, 17), border_radius=3)
+            pygame.draw.rect(surf, RED,              (x + 4, y + 28, 70, 17), border_radius=3, width=2)
+            t = self.fpts.render("PRONTO-SOCORRO SUS", True, RED)
+            surf.blit(t, (x + 6, y + 31))
+            # cruz grande
+            pygame.draw.rect(surf, RED, (x + 10, y + 48, 18, 6))
+            pygame.draw.rect(surf, RED, (x + 16, y + 43, 6, 16))
+            # soro / IV bag
+            pygame.draw.rect(surf, (200, 220, 240), (x + 34, y + 44, 10, 14), border_radius=4)
+            pygame.draw.rect(surf, (180, 200, 225), (x + 34, y + 44, 10, 14), border_radius=4, width=1)
+            pygame.draw.line(surf, (180, 200, 225), (x + 39, y + 58), (x + 39, y + 68), 1)
             # ambulância mini
-            pygame.draw.rect(surf, WHITE, (x + 32, y + 55, 22, 12), border_radius=2)
-            pygame.draw.rect(surf, RED,   (x + 32, y + 55, 10, 12), border_radius=2)
-            pygame.draw.rect(surf, RED,   (x + 35, y + 51,  4,  4))
-            pygame.draw.circle(surf, (40, 40, 40), (x + 36, y + 67), 3)
-            pygame.draw.circle(surf, (40, 40, 40), (x + 50, y + 67), 3)
+            pygame.draw.rect(surf, WHITE, (x + 46, y + 55, 26, 14), border_radius=2)
+            pygame.draw.rect(surf, RED,   (x + 46, y + 55, 12, 14), border_radius=2)
+            pygame.draw.rect(surf, RED,   (x + 50, y + 50,  4,  5))
+            pygame.draw.circle(surf, (40, 40, 40), (x + 50, y + 69), 3)
+            pygame.draw.circle(surf, (40, 40, 40), (x + 68, y + 69), 3)
+            # fila de espera (palitos)
+            for fi in range(3):
+                fx2 = x + 90 + fi * 9
+                pygame.draw.circle(surf, (200, 165, 120), (fx2, y + 50), 3)
+                pygame.draw.line(surf, (120, 100, 80), (fx2, y + 53), (fx2, y + 63), 2)
 
         elif self.name == "Churrascaria":
-            pygame.draw.rect(surf, (165, 80, 30), (x + 5, y + 28, 65, 16), border_radius=3)
-            t = self.fpts.render("Churrasco +Chope", True, WHITE)
-            surf.blit(t, (x + 7, y + 31))
-            # caneca de chope
-            pygame.draw.rect(surf, (215, 190, 70), (x + 5, y + 48, 14, 18), border_radius=3)
+            pygame.draw.rect(surf, (145, 60, 22), (x + 4, y + 28, 68, 17), border_radius=3)
+            t = self.fpts.render("RODÍZIO LIVRE ✓", True, (255, 230, 120))
+            surf.blit(t, (x + 6, y + 31))
+            # caneca de chopp
+            pygame.draw.rect(surf, (215, 190, 70), (x + 4, y + 48, 14, 20), border_radius=3)
             pygame.draw.arc(surf, (215, 190, 70), (x + 16, y + 51, 6, 10), 0, math.pi*2, 2)
-            pygame.draw.rect(surf, WHITE, (x + 6, y + 49, 12, 5), border_radius=1)
-            # churrasco na brasa
-            pygame.draw.rect(surf, (80, 50, 20),  (x + 24, y + 58, 30, 6), border_radius=2)
-            pygame.draw.rect(surf, (220, 80, 20),  (x + 26, y + 58, 26, 3))
-            pygame.draw.line(surf, (160, 90, 20), (x + 30, y + 48), (x + 30, y + 58), 2)
-            for yy in [y+50, y+54]:
-                pygame.draw.ellipse(surf, (185, 60, 30), (x+27, yy, 8, 5))
+            pygame.draw.rect(surf, WHITE, (x + 5, y + 49, 12, 6), border_radius=1)
+            # churrasqueira na brasa
+            pygame.draw.rect(surf, (65, 40, 18), (x + 22, y + 60, 36, 8), border_radius=2)
+            pygame.draw.rect(surf, (220, 70, 15), (x + 24, y + 61, 32, 4))
+            # espetos com carne
+            for sx2 in [x+28, x+38, x+48]:
+                pygame.draw.line(surf, (175, 138, 50), (sx2, y + 48), (sx2, y + 60), 2)
+                for sy2 in [y+50, y+54, y+58]:
+                    pygame.draw.ellipse(surf, (185, 55, 30), (sx2-4, sy2-2, 8, 5))
+            # fumaça animada
+            for fx in [x+26, x+36, x+46, x+56]:
+                pygame.draw.arc(surf, (160, 155, 150),
+                                (fx, y + 44, 7, 7), 0, math.pi, 2)
 
         elif self.name == "Escola":
-            pygame.draw.rect(surf, (60, 120, 65), (x + 5, y + 28, 60, 16), border_radius=3)
-            t = self.fpts.render("Escola Municipal", True, WHITE)
-            surf.blit(t, (x + 7, y + 31))
+            pygame.draw.rect(surf, (50, 100, 55), (x + 4, y + 28, 68, 17), border_radius=3)
+            t = self.fpts.render("E.E. TIRADENTES", True, WHITE)
+            surf.blit(t, (x + 6, y + 31))
             # mastro com bandeira BR
-            pygame.draw.line(surf, (100, 70, 40), (x + 8, y + 47), (x + 8, y + 70), 2)
-            _draw_br_flag(surf, x + 9, y + 47, 22, 14)
-            # lousa
-            pygame.draw.rect(surf, (25, 65, 30), (x + 36, y + 48, 30, 20), border_radius=2)
-            lt = self.fpts.render("BRASIL", True, BR_YELLOW)
-            surf.blit(lt, (x + 37, y + 52))
+            pygame.draw.line(surf, (100, 70, 40), (x + 8, y + 46), (x + 8, y + 70), 2)
+            _draw_br_flag(surf, x + 9, y + 46, 24, 15)
+            # lousa com conteúdo
+            pygame.draw.rect(surf, (22, 58, 26), (x + 36, y + 46, 50, 26), border_radius=2)
+            pygame.draw.rect(surf, (50, 100, 55),(x + 36, y + 46, 50, 26), border_radius=2, width=1)
+            lt1 = self.fpts.render("ENEM 2025", True, WHITE)
+            lt2 = self.fpts.render("Equação:", True, (180, 220, 180))
+            lt3 = self.fpts.render("ax²+bx+c=0", True, BR_YELLOW)
+            surf.blit(lt1, (x + 37, y + 48))
+            surf.blit(lt2, (x + 37, y + 56))
+            surf.blit(lt3, (x + 37, y + 63))
 
         elif self.name == "Lanchonete":
-            pygame.draw.rect(surf, (210, 145, 35), (x + 5, y + 28, 60, 16), border_radius=3)
-            t = self.fpts.render("X-Búrgão R$15", True, (60, 30, 5))
-            surf.blit(t, (x + 7, y + 31))
-            # burguer camadas
-            for i, col in enumerate([(180,110,40),(100,170,50),(220,55,35),(215,175,75)]):
-                pygame.draw.ellipse(surf, col, (x + 5, y + 50 + i * 4, 22, 5))
-            # guaraná
-            pygame.draw.rect(surf, (20, 140, 30), (x + 32, y + 48, 10, 18), border_radius=3)
-            pygame.draw.rect(surf, BR_YELLOW,     (x + 32, y + 48, 10, 6))
-            gt = self.fpts.render("Gu", True, (20, 100, 25))
-            surf.blit(gt, (x + 30, y + 67))
+            pygame.draw.rect(surf, (205, 130, 25), (x + 4, y + 28, 68, 17), border_radius=3)
+            t = self.fpts.render("COMBO R$22,90", True, (40, 20, 5))
+            surf.blit(t, (x + 6, y + 31))
+            # X-burgão camadas
+            for li, (lc, lh) in enumerate([
+                ((185, 120, 45), 5), ((100, 175, 55), 4),
+                ((225, 55, 40),  4), ((215, 178, 80), 6),
+            ]):
+                pygame.draw.ellipse(surf, lc, (x + 4, y + 50 + li * (lh-1), 22, lh))
+            # batata frita
+            fry_col = (225, 185, 55)
+            for fx, fy_len in [(x+30,14),(x+34,12),(x+38,14),(x+42,11),(x+46,13)]:
+                pygame.draw.rect(surf, fry_col, (fx, y+55, 3, fy_len), border_radius=1)
+            pygame.draw.rect(surf, (180, 60, 30), (x+28, y+68, 22, 4), border_radius=2)
+            # guaraná lata
+            pygame.draw.rect(surf, (18, 135, 28), (x + 52, y + 48, 10, 20), border_radius=4)
+            pygame.draw.rect(surf, BR_YELLOW,     (x + 52, y + 50,  10,  6))
+            gt = self.fpts.render("G", True, (20, 100, 25))
+            surf.blit(gt, (x + 54, y + 51))
 
         elif self.name == "Farmácia":
-            pygame.draw.rect(surf, (20, 140, 60), (x + 5, y + 28, 65, 16), border_radius=3)
-            t = self.fpts.render("Farmácia Popular", True, WHITE)
-            surf.blit(t, (x + 7, y + 31))
-            pygame.draw.rect(surf, BR_GREEN, (x + 10, y + 50, 14, 4))
-            pygame.draw.rect(surf, BR_GREEN, (x + 15, y + 45,  4, 14))
-            # remédios
-            for i, col in enumerate([(220, 50, 50), (50, 100, 220), (220, 180, 30)]):
-                pygame.draw.rect(surf, col, (x + 30 + i*10, y + 52, 8, 12), border_radius=3)
-                pygame.draw.line(surf, WHITE, (x+30+i*10, y+58), (x+37+i*10, y+58), 1)
+            pygame.draw.rect(surf, (16, 130, 58), (x + 4, y + 28, 70, 17), border_radius=3)
+            pygame.draw.rect(surf, WHITE,          (x + 4, y + 28, 70, 17), border_radius=3, width=1)
+            t = self.fpts.render("FARMÁCIA POPULAR", True, WHITE)
+            surf.blit(t, (x + 6, y + 31))
+            # cruz verde grande
+            pygame.draw.rect(surf, BR_GREEN, (x + 8, y + 50, 18, 5))
+            pygame.draw.rect(surf, BR_GREEN, (x + 14, y + 44,  6, 17))
+            # prateleiras com remédios
+            for shelf_y in [y+50, y+62]:
+                pygame.draw.rect(surf, (150, 120, 80), (x + 32, shelf_y + 10, 56, 2))
+                for ri, rcol in enumerate([(220,50,50),(50,100,220),(220,180,30),(200,80,160)]):
+                    rx = x + 34 + ri * 13
+                    pygame.draw.rect(surf, rcol, (rx, shelf_y, 10, 10), border_radius=2)
+                    pygame.draw.line(surf, WHITE, (rx, shelf_y + 5), (rx + 10, shelf_y + 5), 1)
+            # desconto sticker
+            pygame.draw.circle(surf, RED, (x + w - 10, y + 47), 9)
+            ds = self.fpts.render("50%", True, WHITE)
+            surf.blit(ds, (x + w - 10 - ds.get_width()//2, y + 42))
 
     def draw(self, surf):
         main, dark = self.colors
@@ -558,6 +679,18 @@ class Location:
         pygame.draw.rect(surf, main, self.rect,               border_radius=6)
         roof = pygame.Rect(self.rect.x, self.rect.y, self.rect.w, 20)
         pygame.draw.rect(surf, dark, roof, border_radius=6)
+        win_col_map = {
+            "hospital":    (200, 225, 255),
+            "supermarket": (185, 215, 255),
+            "restaurant":  (255, 195, 95),
+            "bakery":      (255, 232, 155),
+            "house":       (255, 212, 128),
+        }
+        wc = win_col_map.get(self.loc_type, (228, 212, 148))
+        for wx in (self.rect.x + 4, self.rect.x + self.rect.w - 16):
+            pygame.draw.rect(surf, wc, (wx, self.rect.y + 5, 12, 9), border_radius=1)
+            pygame.draw.line(surf, dark, (wx + 6, self.rect.y + 5), (wx + 6, self.rect.y + 14), 1)
+            pygame.draw.line(surf, dark, (wx, self.rect.y + 9), (wx + 12, self.rect.y + 9), 1)
         dw, dh = 14, 22
         dx, dy = self.rect.centerx - dw // 2, self.rect.bottom - dh
         pygame.draw.rect(surf, dark, (dx, dy, dw, dh), border_radius=3)
@@ -720,8 +853,10 @@ class House:
 #  FLY  (player)
 # ═══════════════════════════════════════════════════════════
 class Fly:
-    SPEED  = 3.8
-    RADIUS = 11
+    SPEED    = 3.8
+    ACCEL    = 0.42   # aceleração por frame
+    FRICTION = 0.78   # atrito quando sem tecla pressionada
+    RADIUS   = 11
 
     def __init__(self, pos, controls: dict,
                  clean_color=(28, 28, 28), loaded_color=(100, 65, 15),
@@ -742,24 +877,44 @@ class Fly:
         self.facing       = 1
         self.radius       = self.RADIUS
         self.flabel_font  = pygame.font.SysFont("Arial", 12, bold=True)
+        self.drift_timer  = random.randint(10, 30)
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
-        v = Vector2(0, 0)
-        if keys[self.controls["left"]]:  v.x -= 1
-        if keys[self.controls["right"]]: v.x += 1
-        if keys[self.controls["up"]]:    v.y -= 1
-        if keys[self.controls["down"]]:  v.y += 1
-        if v.x > 0: self.facing =  1
-        if v.x < 0: self.facing = -1
-        self.vel = v.normalize() * self.SPEED if v.length() > 0 else Vector2(0, 0)
+        acc  = Vector2(0, 0)
+        if keys[self.controls["left"]]:  acc.x -= 1
+        if keys[self.controls["right"]]: acc.x += 1
+        if keys[self.controls["up"]]:    acc.y -= 1
+        if keys[self.controls["down"]]:  acc.y += 1
+
+        if acc.length() > 0:
+            self.vel += acc.normalize() * self.ACCEL
+            if self.vel.length() > self.SPEED:
+                self.vel = self.vel.normalize() * self.SPEED
+        else:
+            self.vel *= self.FRICTION
+            if self.vel.length() < 0.06:
+                self.vel = Vector2(0, 0)
+
+        # micro-deriva de inseto (movimento aleatório leve)
+        self.drift_timer -= 1
+        if self.drift_timer <= 0:
+            self.drift_timer = random.randint(18, 45)
+            self.vel += Vector2(random.uniform(-0.22, 0.22),
+                                random.uniform(-0.22, 0.22))
+
+        # direção do olhar baseada na velocidade
+        if self.vel.length() > 0.3:
+            if self.vel.x > 0:  self.facing =  1
+            elif self.vel.x < 0: self.facing = -1
 
     def update(self):
         self.handle_input()
         self.pos += self.vel
         self.pos.x = max(self.radius, min(W - self.radius, self.pos.x))
         self.pos.y = max(self.radius, min(H - self.radius, self.pos.y))
-        self.wangle = (self.wangle + 28) % 360
+        spd = self.vel.length()
+        self.wangle = (self.wangle + 18 + int(spd * 7)) % 360
         self.bob += 0.12 * self.bob_d
         if abs(self.bob) > 2.2:
             self.bob_d *= -1
@@ -824,18 +979,13 @@ class PoopPile:
         pygame.draw.circle(surf, POOP_LIGHT,(x - int(s*2),  y - int(s*4)),  int(s*5))
         pygame.draw.circle(surf, POOP_LIGHT,(x,             y - int(s*15)), int(s*3))
 
-        # olhos estilo emoji
-        ey = y - int(s * 7)
-        for ex_off in (-int(s*3.5), int(s*3.5)):
-            pygame.draw.circle(surf, WHITE, (x + ex_off, ey), max(2, int(s*3.5)))
-            pygame.draw.circle(surf, BLACK, (x + ex_off, ey), max(1, int(s*1.8)))
-            pygame.draw.circle(surf, WHITE, (x + ex_off - max(1,int(s)), ey - max(1,int(s))),
-                               max(1, int(s*0.9)))
-
-        # sorriso
-        pygame.draw.arc(surf, BLACK,
-                        (x - int(s*4.5), ey + int(s*2), int(s*9), int(s*4)),
-                        math.pi, 2*math.pi, max(1, int(s*1.5)))
+        # ponta espiral (sem rosto — estilo cartoon)
+        tp_y = y - int(s * 21)
+        tp_r = max(3, int(s * 5))
+        pygame.draw.arc(surf, POOP_DARK,
+                        (x - tp_r, tp_y - tp_r // 2, tp_r * 2, tp_r),
+                        math.pi * 0.6, math.pi * 2.3, max(1, int(s * 2)))
+        pygame.draw.circle(surf, POOP_MID, (x, tp_y), max(2, int(s * 2)))
 
         # linhas de cheiro animadas
         t = pygame.time.get_ticks() / 600.0
@@ -918,28 +1068,55 @@ class Game:
             return [random.uniform(-1, 1) *
                     math.exp(-i/(sr*decay)) * 0.52 for i in range(n)]
 
-        # ── peido realista (phase accumulation) ────────────
-        n_fart = int(sr * 0.58)
+        # ── peido realista (harmônicos + flutter + componente úmido) ──
+        n_fart = int(sr * 0.78)
         fart   = []
-        ph     = 0.0
+        ph, ph2, ph3 = 0.0, 0.0, 0.0
         for i in range(n_fart):
             t    = i / sr
             prog = i / n_fart
-            freq = 118 * math.exp(-prog * 0.95) + 46
-            ph  += 2 * math.pi * freq / sr
-            flutter = max(0.07,
-                          abs(math.sin(2*math.pi*14*t)) *
-                          abs(math.sin(2*math.pi*8.3*t + 0.6)))
-            v = (math.sin(ph)       * 1.00 +
-                 math.sin(ph * 2)   * 0.65 +
-                 math.sin(ph * 3)   * 0.42 +
-                 math.sin(ph * 4.8) * 0.15 +
-                 random.uniform(-0.22, 0.22))
-            v   /= 2.44
-            env  = (prog / 0.04 if prog < 0.04
-                    else max(0.0, (1.0 - prog) / 0.96))
-            fart.append(v * flutter * env * 0.60)
+            freq  = 155 * math.exp(-prog * 1.35) + 36
+            ph   += 2 * math.pi * freq / sr
+            ph2  += 2 * math.pi * (freq * 1.98 + math.sin(2*math.pi*4.1*t) * 3) / sr
+            ph3  += 2 * math.pi * freq * 3.05 / sr
+            flutter = (abs(math.sin(2*math.pi*17*t)) ** 0.6 *
+                       abs(math.sin(2*math.pi*9.5*t + 1.1)) ** 0.5)
+            flutter = max(0.04, flutter)
+            wet   = random.uniform(-1, 1) * (0.28 + 0.20 * math.sin(2*math.pi*6*t) ** 2)
+            v = (math.sin(ph)  * 1.00 +
+                 math.sin(ph2) * 0.62 +
+                 math.sin(ph3) * 0.38 +
+                 math.sin(ph * 4.9) * 0.18 +
+                 math.sin(ph * 6.8) * 0.08)
+            v = (v * 0.68 + wet * 0.32) / 2.96
+            if prog < 0.05:
+                env = prog / 0.05
+            elif prog < 0.72:
+                env = 1.0 - (prog - 0.05) * 0.12
+            else:
+                env = max(0.0, (1.0 - prog) / 0.28)
+            fart.append(v * flutter * env * 0.68)
         self.snd_poop = make(fart)
+
+        # ── risada humana "HA-HA-HA" ───────────────────────────────────
+        n_laugh = int(sr * 0.95)
+        laugh   = []
+        for i in range(n_laugh):
+            t     = i / sr
+            burst = 0.0
+            for bi, start in enumerate([0.02, 0.30, 0.58]):
+                dur = 0.20
+                if start <= t <= start + dur:
+                    prog = (t - start) / dur
+                    freq_l = 195 + 55 * math.sin(math.pi * prog)
+                    v_l = (math.sin(2*math.pi*freq_l*t)     * 0.50 +
+                           math.sin(2*math.pi*freq_l*2*t)   * 0.28 +
+                           math.sin(2*math.pi*freq_l*3*t)   * 0.14 +
+                           random.uniform(-0.12, 0.12))
+                    env_l = max(0.0, math.sin(math.pi * prog)) ** 0.55
+                    burst += v_l * env_l * 0.55
+            laugh.append(max(-1.0, min(1.0, burst)))
+        self.snd_laugh = make(laugh)
 
         # ── sons por estabelecimento ────────────────────────
         self.snd_score = {
@@ -1102,6 +1279,7 @@ class Game:
             self.death_insult = random.choice(DEATH_INSULTS)
             self.shake       = 8
             self.snd_die.play()
+            self.snd_laugh.play()
             self.state       = "game_over"
             self._save_hs()
 
@@ -1274,6 +1452,26 @@ class Game:
         for my in range(10, H - 180, 44):
             pygame.draw.rect(self.screen, MARK, (831, my, 5, 26))
 
+        # ── Faixas de pedestres nas interseções ───────────────
+        CROSS = (238, 238, 228)
+        for i in range(4):
+            pygame.draw.rect(self.screen, CROSS, (472, 182 + i * 11,  81, 6))   # A × H1
+            pygame.draw.rect(self.screen, CROSS, (472, 354 + i * 11,  81, 6))   # A × H2
+            pygame.draw.rect(self.screen, CROSS, (782, 182 + i * 11, 101, 6))   # B × H1
+            pygame.draw.rect(self.screen, CROSS, (782, 354 + i * 11, 101, 6))   # B × H2
+
+        # ── Postes de luz nas interseções ─────────────────────
+        pcol = (55, 57, 64)
+        for px, py in [(467, 178), (778, 178), (467, 350), (778, 350)]:
+            pygame.draw.line(self.screen, pcol, (px, py), (px, py - 36), 3)
+            pygame.draw.line(self.screen, pcol, (px, py - 36), (px + 14, py - 40), 2)
+            pygame.draw.ellipse(self.screen, pcol,              (px + 10, py - 47, 12, 7))
+            pygame.draw.ellipse(self.screen, (255, 245, 160),   (px + 11, py - 45, 10, 4))
+            if self.phase >= 4:
+                gls = pygame.Surface((22, 18), pygame.SRCALPHA)
+                pygame.draw.ellipse(gls, (255, 240, 130, 80), (0, 0, 22, 18))
+                self.screen.blit(gls, (px + 5, py - 52))
+
     def _apply_shake(self):
         if self.shake <= 0:
             return
@@ -1287,9 +1485,26 @@ class Game:
         self.screen.fill(bg)
         self.screen.blit(tmp, (ox, oy))
 
+    def _draw_trees(self):
+        if self.phase >= 4:
+            cd, cm, cl = (22, 55, 25), (32, 72, 35), (42, 88, 45)
+        else:
+            cd, cm, cl = (40, 112, 46), (52, 135, 56), (68, 152, 70)
+        for tx, ty in [
+            (162, 140), (162, 295), (162, 460),
+            (1112, 160), (1112, 310), (1112, 510),
+            (1205, 225), (1205, 455),
+        ]:
+            pygame.draw.rect(self.screen, (95, 62, 28),  (tx - 4, ty - 20, 8, 22), border_radius=2)
+            pygame.draw.circle(self.screen, cd, (tx,     ty - 28), 22)
+            pygame.draw.circle(self.screen, cm, (tx - 9, ty - 36), 15)
+            pygame.draw.circle(self.screen, cm, (tx + 9, ty - 33), 13)
+            pygame.draw.circle(self.screen, cl, (tx,     ty - 40), 10)
+
     def _draw_playing(self):
         self._draw_bg()
         self._draw_roads()
+        self._draw_trees()
         for p in self.poops:
             p.draw(self.screen)
         lbl = self.f_tiny.render("ZONA DO COCÔ", True, (200, 160, 70))
