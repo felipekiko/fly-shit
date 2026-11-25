@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import ast, sys; ast.parse\\(open\\('main.py'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(.venv/bin/python -c \"import pygame; print\\('pygame', pygame.__version__, '- OK'\\)\")",
+      "Bash(.venv/bin/python -c \"import ast; ast.parse\\(open\\('main.py'\\).read\\(\\)\\); print\\('syntax OK'\\)\")",
+      "Bash(export DISPLAY=:0)",
+      "Bash(.venv/bin/python main.py)",
+      "Bash(pkill -f \"python main.py\")",
+      "Bash(awk '{print \"PID\",$2,\"CPU:\"$3\"%\"}')",
+      "Bash(echo \"PID: $!\")",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(git add *)",
+      "Bash(pkill -f main.py)",
+      "Bash(DISPLAY=:0 .venv/bin/python main.py)",
+      "Bash(.venv/bin/python *)"
+    ]
+  }
+}
